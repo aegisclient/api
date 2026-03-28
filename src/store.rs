@@ -10,7 +10,6 @@ pub struct Store {
     pub configs: Vec<UserConfig>,
     pub capes: Vec<CapeEntry>,
     pub total_validations: u64,
-    pub admin_password: String,
     pub latest_version: String,
     pub download_url: String,
     pub changelog: String,
@@ -35,26 +34,23 @@ impl Store {
             }
         }
 
-        let mut store = Self {
+        // Fresh store — no keys seeded. Create your first key via:
+        //   curl -X POST http://localhost:3000/admin/keys \
+        //     -H "Authorization: Bearer $AEGIS_ADMIN_TOKEN" \
+        //     -H "Content-Type: application/json" \
+        //     -d '{"key":"YourKeyHere","owner":"you"}'
+        let store = Self {
             keys: Vec::new(),
             configs: Vec::new(),
             capes: Vec::new(),
             total_validations: 0,
-            admin_password: "aegis-admin-2026".to_string(),
             latest_version: "2.0.0".to_string(),
             download_url: "https://aegisclient.github.io/site/aegis-launcher-1.0.0.jar".to_string(),
             changelog: "v2.0.0: Premium system, 142 modules, launcher upgrade".to_string(),
         };
 
-        // Seed the original premium key
-        store.keys.push(PremiumKey::new(
-            "UltronJARVIS7232!".to_string(),
-            Some("arhan".to_string()),
-            None, // permanent
-        ));
-
         store.save();
-        tracing::info!("Created fresh store with default key");
+        tracing::info!("Created fresh store — use POST /admin/keys to create your first key");
         store
     }
 
@@ -77,10 +73,6 @@ impl Store {
 
     pub fn find_key_mut(&mut self, key: &str) -> Option<&mut PremiumKey> {
         self.keys.iter_mut().find(|k| k.key == key)
-    }
-
-    pub fn find_key_by_id(&self, id: &str) -> Option<&PremiumKey> {
-        self.keys.iter().find(|k| k.id == id)
     }
 
     pub fn find_config(&self, username: &str) -> Option<&UserConfig> {
